@@ -2,7 +2,7 @@ import { graphql, Link } from 'gatsby';
 import kebabCase from 'lodash/kebabCase';
 import React from 'react';
 import Helmet from 'react-helmet';
-import { Comments } from '../components/comments';
+// import { Comments } from '../components/comments';
 import { MainContent } from '../components/main-content';
 import { OutLink } from '../components/OutLink';
 import { RssIcon } from '../components/rss-icon';
@@ -39,10 +39,10 @@ export default function Template({ data, pageContext }) {
       frontmatter: { title, date, tags, keywords, summary, path },
       html,
       timeToRead
-    },
-    github: {
-      search: { nodes: comments }
     }
+    // github: {
+    //   search: { nodes: comments }
+    // }
   } = data;
 
   const hasSummary = !!summary && summary.length > 0;
@@ -104,7 +104,7 @@ export default function Template({ data, pageContext }) {
             />
           </article>
         </main>
-        <Comments comments={comments} articlePath={path} />
+        {/* <Comments comments={comments} articlePath={path} /> */}
         <AdjacentArticles
           previous={pageContext.previous}
           next={pageContext.next}
@@ -123,7 +123,8 @@ export default function Template({ data, pageContext }) {
 }
 
 export const pageQuery = graphql`
-  query BlogPostByPath($path: String!, $commentsSearch: String!) {
+  # query BlogPostByPath($path: String!, $commentsSearch: String!) {
+  query BlogPostByPath($path: String!) {
     markdownRemark(frontmatter: { path: { eq: $path } }) {
       html
       frontmatter {
@@ -136,24 +137,24 @@ export const pageQuery = graphql`
       }
       timeToRead
     }
-    github {
-      search(query: $commentsSearch, type: ISSUE, first: 100) {
-        nodes {
-          ... on GitHub_Issue {
-            id
-            url
-            bodyHTML
-            createdAt
-            author {
-              ... on GitHub_User {
-                name
-              }
-              avatarUrl
-              url
-            }
-          }
-        }
-      }
-    }
+    # github {
+    #   search(query: $commentsSearch, type: ISSUE, first: 100) {
+    #     nodes {
+    #       ... on GitHub_Issue {
+    #         id
+    #         url
+    #         bodyHTML
+    #         createdAt
+    #         author {
+    #           ... on GitHub_User {
+    #             name
+    #           }
+    #           avatarUrl
+    #           url
+    #         }
+    #       }
+    #     }
+    #   }
+    # }
   }
 `;

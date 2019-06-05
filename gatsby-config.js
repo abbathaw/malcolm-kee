@@ -23,20 +23,39 @@ module.exports = {
     'gatsby-plugin-react-helmet',
     'gatsby-transformer-json',
     {
-      resolve: 'gatsby-source-graphql',
+      resolve: `gatsby-source-mysql`,
       options: {
-        typeName: 'GitHub',
-        fieldName: 'github',
-        // Url to query from
-        url: 'https://api.github.com/graphql',
-        // HTTP headers
-        headers: {
-          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`
+        connectionDetails: {
+          host: 'localhost',
+          user: 'root',
+          password: 'password',
+          database: 'sakila'
         },
-        // Additional options to pass to node-fetch
-        fetchOptions: {}
+        queries: [
+          {
+            statement: 'SELECT * FROM staff',
+            idFieldName: 'staff_id',
+            name: 'staff',
+            imageFieldNames: ['picture']
+          }
+        ]
       }
     },
+    // {
+    //   resolve: 'gatsby-source-graphql',
+    //   options: {
+    //     typeName: 'GitHub',
+    //     fieldName: 'github',
+    //     // Url to query from
+    //     url: 'https://api.github.com/graphql',
+    //     // HTTP headers
+    //     headers: {
+    //       Authorization: `Bearer ${process.env.GITHUB_TOKEN}`
+    //     },
+    //     // Additional options to pass to node-fetch
+    //     fetchOptions: {}
+    //   }
+    // },
     {
       resolve: 'gatsby-source-filesystem',
       options: {
