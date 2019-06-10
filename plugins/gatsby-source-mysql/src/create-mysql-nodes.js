@@ -32,6 +32,18 @@ function reduceChildFields(childEntities, nodeId) {
   return childFields;
 }
 
+function omit(object, paths) {
+  const result = {};
+
+  Object.keys(object).forEach(key => {
+    if (paths.indexOf(key) === -1) {
+      result[key] = object[key];
+    }
+  });
+
+  return result;
+}
+
 function mapSqlResults(
   __sqlResult,
   { parentName, foreignKey, childEntities, idFieldName }
@@ -65,8 +77,7 @@ function mapSqlResults(
 async function createMysqlNodes(
   { name, __sqlResult, idFieldName, parentName, foreignKey, imageFieldNames },
   allSqlResults,
-  createNode,
-  createNodeId
+  { createNode, createNodeId, store, createParentChildLink }
 ) {
   const MySqlNode = createNodeFactory(name);
   const childEntities = allSqlResults.filter(
@@ -82,22 +93,28 @@ async function createMysqlNodes(
 
     await Promise.all(
       sqlNodes.map(async node => {
-        const resultNode = MySqlNode(node);
-        await createNode(resultNode);
+        const nodeWithoutImageFields = omit(node, imageFieldNames);
+        const sqlNode = MySqlNode(nodeWithoutImageFields);
+        await createNode(sqlNode);
 
         return Promise.all(
-          imageFieldNames.map(field => {
+          imageFieldNames.map(async field => {
             const image = node[field];
 
-            const imageNode = createBufferFileNode({
+            const imageNode = await createBufferFileNode({
               createNodeId,
+              store,
               fieldName: field,
               buffer: image,
-              parentId: node.id
+              parentId: sqlNode.id
             });
 
             if (imageNode) {
-              return createNode(imageNode);
+              await createNode(imageNode);
+              createParentChildLink({
+                parent: sqlNode,
+                child: imageNode
+              });
             }
           })
         );

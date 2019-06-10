@@ -1,5 +1,4 @@
-import { Link, useStaticQuery, graphql } from 'gatsby';
-import Img from 'gatsby-image';
+import { Link } from 'gatsby';
 import React from 'react';
 import { ContactForm } from '../components/ContactForm';
 import { LandingPageBackground } from '../components/LandingPageBackground';
@@ -9,31 +8,12 @@ import { SiteMetadata } from '../components/SiteMetadata';
 import { Typography } from '../components/Typography';
 import './index.scss';
 
-const SqlImage = () => {
-  const data = useStaticQuery(graphql`
-    {
-      mysqlImage(id: { eq: "12e2cb35-7232-55f5-a50a-3f42e09ef3a9" }) {
-        childImageSharp {
-          fluid(quality: 100, maxWidth: 50) {
-            ...GatsbyImageSharpFluid_withWebp
-          }
-        }
-      }
-    }
-  `);
-
-  const imageData = data.background.childImageSharp.fluid;
-
-  return <Img fluid={imageData} />;
-};
-
 const LandingPageSection = ({ children }) => (
   <section className="landing-page-section-content">{children}</section>
 );
 
 const IndexPage = () => (
   <div className="landing-page">
-    <SqlImage />
     <SiteMetadata />
     <LandingPageHeader />
     <div className="landing-page-content">
