@@ -1,7 +1,7 @@
 const queryDb = require('./src/db');
 const createMysqlNodes = require('./src/create-mysql-nodes');
 
-exports.sourceNodes = async ({ actions }, configOptions) => {
+exports.sourceNodes = async ({ actions, createNodeId }, configOptions) => {
   const { createNode } = actions;
   const { connectionDetails, queries } = configOptions;
 
@@ -13,7 +13,7 @@ exports.sourceNodes = async ({ actions }, configOptions) => {
         Object.assign({}, query, { __sqlResult: queryResults[index] })
       )
       .forEach((sqlResult, _, sqlResults) =>
-        createMysqlNodes(sqlResult, sqlResults, createNode)
+        createMysqlNodes(sqlResult, sqlResults, createNode, createNodeId)
       );
 
     db.end();

@@ -28,7 +28,7 @@ module.exports = {
         connectionDetails: {
           host: 'localhost',
           user: 'root',
-          password: 'password',
+          password: 'root',
           database: 'sakila'
         },
         queries: [

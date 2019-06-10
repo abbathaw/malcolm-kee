@@ -1,13 +1,9 @@
 const createNodeHelpers = require('gatsby-node-helpers').default;
 const pluralize = require('pluralize');
-const imageType = require('image-type');
+const { createBufferFileNode } = require('./create-file-node');
 
 const { createNodeFactory, generateNodeId } = createNodeHelpers({
   typePrefix: 'mysql'
-});
-
-const { createNodeFactory: createImageNodeFactory } = createNodeHelpers({
-  typePrefix: 'mysqlImage'
 });
 
 function reduceChildFields(childEntities, nodeId) {
@@ -66,13 +62,13 @@ function mapSqlResults(
   });
 }
 
-function createMysqlNodes(
+async function createMysqlNodes(
   { name, __sqlResult, idFieldName, parentName, foreignKey, imageFieldNames },
   allSqlResults,
-  createNode
+  createNode,
+  createNodeId
 ) {
   const MySqlNode = createNodeFactory(name);
-  console.log({ imageFieldNames });
   const childEntities = allSqlResults.filter(
     ({ parentName }) => !!parentName && parentName === name
   );
@@ -84,29 +80,29 @@ function createMysqlNodes(
       childEntities
     );
 
-    const MySqlImageNode = createImageNodeFactory(name);
+    await Promise.all(
+      sqlNodes.map(async node => {
+        const resultNode = MySqlNode(node);
+        await createNode(resultNode);
 
-    sqlNodes.forEach(node => {
-      const resultNode = MySqlNode(node);
-      createNode(resultNode);
+        return Promise.all(
+          imageFieldNames.map(field => {
+            const image = node[field];
 
-      imageFieldNames.forEach(field => {
-        const image = node[field];
+            const imageNode = createBufferFileNode({
+              createNodeId,
+              fieldName: field,
+              buffer: image,
+              parentId: node.id
+            });
 
-        if (image && Buffer.isBuffer(image)) {
-          const { ext, mime } = imageType(image);
-          const imageNode = MySqlImageNode({
-            id: `${resultNode.id} >> Image`,
-            extension: ext,
-            parent: resultNode.id,
-            internal: {
-              mediaType: mime
+            if (imageNode) {
+              return createNode(imageNode);
             }
-          });
-          createNode(imageNode);
-        }
-      });
-    });
+          })
+        );
+      })
+    );
   }
 }
 
